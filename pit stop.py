@@ -40,8 +40,18 @@ def countdown():
     ## find some multimedia library that can call back to here when the video is done playing, then initiate the game
     ## for now there is just gonna be a cute little for loop here
     
+    global screen
+    countdown_font = pygame.font.Font(pygame.font.match_font("sans", bold=True, italic=False), 160)
+    screen.fill((128,0,0))
+    pygame.display.flip()
+    
     for i in range(1, 4):
-        print(4 - i)
+        screen.fill((128,0,0))
+        fwn_text = countdown_font.render(str(4- i), True, (255,255,255))
+        fwn_rect = fwn_text.get_rect()
+        fwn_rect.center = [screen.get_width() *0.5, screen.get_height()*0.5]
+        screen.blit(fwn_text, fwn_rect)
+        pygame.display.flip()
         sleep(1)
     
     gameloop()
@@ -53,7 +63,7 @@ def gameloop():
     global sensors_dict
     front_wheel = wheel("Front", sensors_dict["WHEEL_F_PRESENT"], sensors_dict["WHEEL_F_LOCKED"], sensors_dict["WHEEL_F_NEW"])
     rear_wheel = wheel("Rear", sensors_dict["WHEEL_R_PRESENT"], sensors_dict["WHEEL_R_LOCKED"], sensors_dict["WHEEL_R_NEW"])
-    main_tank = fueltank("Fuel Tank", sensors_dict["FUEL_PROBE"])
+    fuel = fueltank("Fuel Tank", sensors_dict["FUEL_PROBE"])
     
     global screen, dt, dtu, elapsed
     clock = pygame.time.Clock()
@@ -62,12 +72,13 @@ def gameloop():
     indicators_font = pygame.font.Font(pygame.font.match_font("sans", bold=True, italic=False), 24)
     clock_font_comp = pygame.font.Font(pygame.font.match_font("7-segment", bold=True, italic=False), 48)
     
-    fc = rc = False
-    fc_time = rc_time = "--:--:--"
+    fc = rc = tc = False
+    fc_time = rc_time = tc_time = "--:--:--"
     
     while True:
         front_wheel.update()
         rear_wheel.update()
+        fuel.update()
         
         
         # poll for events
@@ -79,10 +90,11 @@ def gameloop():
         screen.fill((0,0,128))
         
         
-        millisc = floor((elapsed - floor(elapsed)) * 100)
-        seconds = floor(elapsed) % 60
-        minutes = floor(elapsed / 60)
-        timestr = str(minutes).rjust(2, '0') + ":" + str(seconds).rjust(2, '0') + ":" + str(millisc).rjust(2, '0')
+        if (not (fc and rc and tc)):
+            millisc = floor((elapsed - floor(elapsed)) * 100)
+            seconds = floor(elapsed) % 60
+            minutes = floor(elapsed / 60)
+            timestr = str(minutes).rjust(2, '0') + ":" + str(seconds).rjust(2, '0') + ":" + str(millisc).rjust(2, '0')
         clock_text = clock_font.render(timestr, True, (255, 255, 255))
         clock_rect = clock_text.get_rect()
         clock_rect.center = [screen.get_width() *0.5, screen.get_height()*0.875]
@@ -154,9 +166,34 @@ def gameloop():
         clock_rc_rect = clock_rc_text.get_rect()
         clock_rc_rect.center = [screen.get_width() *0.75, screen.get_height()*0.675]
         screen.blit(clock_rc_text, clock_rc_rect)
+        
+        tp_text = indicators_font.render("FUEL HOSE INSERTED: " + str(fuel.get_probe()), True, (255* int(not fuel.get_probe()), 255 * int(fuel.get_probe()), 0))
+        tp_rect = tp_text.get_rect()
+        tp_rect.center = [screen.get_width() *0.5, screen.get_height()*0.25]
+        screen.blit(tp_text, tp_rect)
+        
+        tf_text = indicators_font.render("FUEL TANK FULL: " + str(fuel.get_full()), True, (255* int(not fuel.get_full()), 255 * int(fuel.get_full()), 0))
+        tf_rect = tf_text.get_rect()
+        tf_rect.center = [screen.get_width() *0.5, screen.get_height()*0.30]
+        screen.blit(tf_text, tf_rect)
+        
+        tl_text = indicators_font.render("FUEL TANK LEVEL: " + str(floor(fuel.get_level())) +"%", True, (0,255,0))
+        tl_rect = tf_text.get_rect()
+        tl_rect.center = [screen.get_width() *0.5, screen.get_height()*0.35]
+        screen.blit(tl_text, tl_rect)
+        
+        if ((not tc) and fuel.get_full()):
+            tc = True
+            tc_time = timestr
+        
+        clock_tc_text = clock_font_comp.render(tc_time, True, (255, 255, 255))
+        clock_tc_rect = clock_fc_text.get_rect()
+        clock_tc_rect.center = [screen.get_width() *0.5, screen.get_height()*0.675]
+        screen.blit(clock_tc_text, clock_tc_rect)
        
         # flip() the display to put your work on screen
         pygame.display.flip()
+        
 
         # limits FPS to 60
         # dt is delta time in seconds since last frame, used for framerate-

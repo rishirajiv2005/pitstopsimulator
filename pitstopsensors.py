@@ -59,17 +59,22 @@ class fueltank:
     def __init__(self, name, pin_no_probe):
         self.name = name
         self.level = 0.0
+        self.max_level = 100.0
         self.full = False
         self.probe_inserted = False
-        
         self.input_probe = Button(pin_no_probe)
         
     def update(self):
         self.probe_inserted = bool(self.input_probe.value)
-        self.level += (0.01 * int(self.probe_inserted))
+        self.level += (0.2 * int(self.probe_inserted))
+        if self.level >= self.max_level:
+            self.level = self.max_level
+            self.full = True
     
     def get_probe(self):
         return self.probe_inserted
     def get_level(self):
-        return self._level
+        return self.level
+    def get_full(self):
+        return self.full
     
