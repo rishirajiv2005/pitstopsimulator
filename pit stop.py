@@ -15,7 +15,7 @@ for line in sensors_list:
     
 # pygame setup
 pygame.init()
-screen = pygame.display.set_mode((1600, 900))
+screen = pygame.display.set_mode((1280, 720))
 dt = 0
 elapsed = 0
 
@@ -55,31 +55,20 @@ def gameloop():
     rear_wheel = wheel("Rear", sensors_dict["WHEEL_R_PRESENT"], sensors_dict["WHEEL_R_LOCKED"], sensors_dict["WHEEL_R_NEW"])
     main_tank = fueltank("Fuel Tank", sensors_dict["FUEL_PROBE"])
     
-    global screen, dt, elapsed
+    global screen, dt, dtu, elapsed
     clock = pygame.time.Clock()
-    clock_font = pygame.font.Font(pygame.font.match_font("7-segment", bold=True, italic=False), 96)
-#     clock_text = clock_font.render("00:00:00", True, (255, 255, 255))
-#     clock_rect = clock_text.get_rect()
-#     clock_rect.center = [screen.get_width() *0.5, screen.get_height()*0.5]
+    clock_font = pygame.font.Font(pygame.font.match_font("7-segment", bold=True, italic=False), 128)
     
     indicators_font = pygame.font.Font(pygame.font.match_font("sans", bold=True, italic=False), 24)
-#     fwp_text = indicators_font.render("FW PRESENT", True, (0, 255, 0))
-#     fwp_rect = fwp_text.get_rect()
-#     fwp_rect.center = [screen.get_width() *0.33333, screen.get_height()*0.25]
+    clock_font_comp = pygame.font.Font(pygame.font.match_font("7-segment", bold=True, italic=False), 48)
+    
+    fc = rc = False
+    fc_time = rc_time = "--:--:--"
     
     while True:
-        front_wheel.set_present()
-        front_wheel.set_lock()
-        front_wheel.set_new()
+        front_wheel.update()
+        rear_wheel.update()
         
-        rear_wheel.set_present()
-        rear_wheel.set_lock()
-        rear_wheel.set_new()
-        
-        #print("fw present: " + str(front_wheel.present) + " fw locked: " + str(front_wheel.locked) + " fw new: " + str(front_wheel.new))
-        #print("rw present: " + str(rear_wheel.present) + " rw locked: " + str(rear_wheel.locked) + " rw new: " + str(rear_wheel.new))
-        
-        ## validation func calls go here
         
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
@@ -99,27 +88,72 @@ def gameloop():
         clock_rect.center = [screen.get_width() *0.5, screen.get_height()*0.875]
         screen.blit(clock_text, clock_rect)
         
-        fwp_text = indicators_font.render("FW PRESENT: " + str(front_wheel.present), True, (255* int(not front_wheel.present), 255 * int(front_wheel.present), 0))
+        fwp_text = indicators_font.render("FW PRESENT: " + str(front_wheel.get_present()), True, (255* int(not front_wheel.get_present()), 255 * int(front_wheel.get_present()), 0))
         fwp_rect = fwp_text.get_rect()
         fwp_rect.center = [screen.get_width() *0.25, screen.get_height()*0.25]
         screen.blit(fwp_text, fwp_rect)
         
-        fwl_text = indicators_font.render("FW LOCKED: " + str(front_wheel.locked), True, (255* int(not front_wheel.locked), 255 * int(front_wheel.locked), 0))
+        fwl_text = indicators_font.render("FW LOCKED: " + str(front_wheel.get_locked()), True, (255* int(not front_wheel.get_locked()), 255 * int(front_wheel.get_locked()), 0))
         fwl_rect = fwl_text.get_rect()
         fwl_rect.center = [screen.get_width() *0.25, screen.get_height()*0.30]
         screen.blit(fwl_text, fwl_rect)
         
-        rwp_text = indicators_font.render("RW PRESENT: " + str(rear_wheel.present), True, (255* int(not rear_wheel.present), 255 * int(rear_wheel.present), 0))
+        fwn_text = indicators_font.render("FW NEW: " + str(front_wheel.new), True, (255* int(not front_wheel.new), 255 * int(front_wheel.new), 0))
+        fwn_rect = fwn_text.get_rect()
+        fwn_rect.center = [screen.get_width() *0.25, screen.get_height()*0.35]
+        screen.blit(fwn_text, fwn_rect)
+        
+        fwv_text = indicators_font.render("FW VALID: " + str(front_wheel.get_valid()), True, (255* int(not front_wheel.get_valid()), 255 * int(front_wheel.get_valid()), 0))
+        fwv_rect = fwv_text.get_rect()
+        fwv_rect.center = [screen.get_width() *0.25, screen.get_height()*0.40]
+        screen.blit(fwv_text, fwv_rect)
+        
+        fwc_text = indicators_font.render("FW COMPLETE: " + str(front_wheel.get_complete()), True, (255* int(not front_wheel.get_complete()), 255 * int(front_wheel.get_complete()), 0))
+        fwc_rect = fwc_text.get_rect()
+        fwc_rect.center = [screen.get_width() *0.25, screen.get_height()*0.45]
+        screen.blit(fwc_text, fwc_rect)
+        
+        rwp_text = indicators_font.render("RW PRESENT: " + str(rear_wheel.get_present()), True, (255* int(not rear_wheel.get_present()), 255 * int(rear_wheel.get_present()), 0))
         rwp_rect = rwp_text.get_rect()
         rwp_rect.center = [screen.get_width() *0.75, screen.get_height()*0.25]
         screen.blit(rwp_text, rwp_rect)
         
-        rwl_text = indicators_font.render("RW LOCKED: " + str(rear_wheel.locked), True, (255* int(not rear_wheel.locked), 255 * int(rear_wheel.locked), 0))
+        rwl_text = indicators_font.render("RW LOCKED: " + str(rear_wheel.get_locked()), True, (255* int(not rear_wheel.get_locked()), 255 * int(rear_wheel.get_locked()), 0))
         rwl_rect = rwl_text.get_rect()
         rwl_rect.center = [screen.get_width() *0.75, screen.get_height()*0.30]
         screen.blit(rwl_text, rwl_rect)
         
-        print(screen.get_width())
+        rwn_text = indicators_font.render("RW NEW: " + str(rear_wheel.new), True, (255* int(not rear_wheel.new), 255 * int(rear_wheel.new), 0))
+        rwn_rect = rwn_text.get_rect()
+        rwn_rect.center = [screen.get_width() *0.75, screen.get_height()*0.35]
+        screen.blit(rwn_text, rwn_rect)
+        
+        rwv_text = indicators_font.render("RW VALID: " + str(rear_wheel.get_valid()), True, (255* int(not rear_wheel.get_valid()), 255 * int(rear_wheel.get_valid()), 0))
+        rwv_rect = rwv_text.get_rect()
+        rwv_rect.center = [screen.get_width() *0.75, screen.get_height()*0.40]
+        screen.blit(rwv_text, rwv_rect)
+        
+        rwc_text = indicators_font.render("RW COMPLETE: " + str(rear_wheel.get_complete()), True, (255* int(not rear_wheel.get_complete()), 255 * int(rear_wheel.get_complete()), 0))
+        rwc_rect = rwc_text.get_rect()
+        rwc_rect.center = [screen.get_width() *0.75, screen.get_height()*0.45]
+        screen.blit(rwc_text, rwc_rect)
+        
+        if ((not fc) and front_wheel.get_complete()):
+            fc = True
+            fc_time = timestr
+        if ((not rc) and rear_wheel.get_complete()):
+            rc = True
+            rc_time = timestr
+        
+        clock_fc_text = clock_font_comp.render(fc_time, True, (255, 255, 255))
+        clock_fc_rect = clock_fc_text.get_rect()
+        clock_fc_rect.center = [screen.get_width() *0.25, screen.get_height()*0.675]
+        screen.blit(clock_fc_text, clock_fc_rect)
+        
+        clock_rc_text = clock_font_comp.render(rc_time, True, (255, 255, 255))
+        clock_rc_rect = clock_rc_text.get_rect()
+        clock_rc_rect.center = [screen.get_width() *0.75, screen.get_height()*0.675]
+        screen.blit(clock_rc_text, clock_rc_rect)
        
         # flip() the display to put your work on screen
         pygame.display.flip()

@@ -17,33 +17,36 @@ class wheel:
         self.present = True
         self.locked = True
         self.new = False
+        self.valid = True
+        self.complete = False
         
         # gpio buttons
         self.input_present = Button(pin = pin_no_present, bounce_time = 0.01)
         self.input_locked = Button(pin = pin_no_locked, bounce_time = 0.01)
         self.input_new = Button(pin = pin_no_new, bounce_time = 0.01)
         
-        
-    
-    
-    
     ## getter functions should take gpio sensors and return the relevant information
     ## for now they will just grab inputs from the command line    
     
-    def set_present(self):
-        self.present = bool(self.input_present.value) ^ REVERSE_WHEEL_BUTTONS
-        
-    def set_lock(self):
+    def update(self):
         self.locked = bool(self.input_locked.value) ^ REVERSE_WHEEL_BUTTONS
-
-    def set_new(self):
-        if (not self.new):
-            self.new = bool(self.input_new.value)
-        
-    def validate(self):
+        if ((not (self.present or self.locked)) and bool(self.input_present.value)):
+            self.new = True
+        self.present = bool(self.input_present.value) ^ REVERSE_WHEEL_BUTTONS
+        self.valid = True
         if (not self.present and self.locked):
-            return False
-        return True
+            self.valid = False
+        if self.new and self.present and self.locked:
+            self.complete = True
+    
+    def get_present(self):
+        return self.present
+    def get_locked(self):
+        return self.locked
+    def get_valid(self):
+        return self.valid
+    def get_complete(self):
+        return self.complete
 
 ## FUEL TANK CLASS
 
@@ -61,9 +64,12 @@ class fueltank:
         
         self.input_probe = Button(pin_no_probe)
         
-    def fill(self):
-        self.level += 0.01
+    def update(self):
+        self.probe_inserted = bool(self.input_probe.value)
+        self.level += (0.01 * int(self.probe_inserted))
     
-    def set_probe(self):
-        self.probe_inserted = bool(self.input_probe.value) 
+    def get_probe(self):
+        return self.probe_inserted
+    def get_level(self):
+        return self._level
     
