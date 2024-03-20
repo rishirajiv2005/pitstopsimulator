@@ -1,22 +1,27 @@
 from time import *
-import guizero
+#import guizero
 from pitstopsensors import *
 
-game_start = 0
-wheel_f_on = 1
-wheel_f_lk = 1
-wheel_r_on = 1
-wheel_r_lk = 1
-fuel = 0
+SENSOR_CFG_FILE = "./sensors.txt"
+
+sensors_file = open(SENSOR_CFG_FILE, "r")
+sensors_list = sensors_file.readlines()
+sensors_dict = {}
+
+for line in sensors_list:
+    keyval = line.replace(" ","").split("=")
+    sensors_dict[keyval[0]] = int(keyval[1])
+
 
 def idle():
     ## play attract video from here
     
-    global game_start
+    global sensors_dict
+    game_start_input = Button(sensors_dict["GAME_START"])
     while True:
         print("idling")
-        game_start = bool(int(input("start? ")))
-        if game_start == 1:
+
+        if game_start_input.value:
             print("countdown")
             countdown()
         
@@ -38,11 +43,11 @@ def countdown():
 
 def gameloop():
     ## main gameplay loop
-    ## for now there will be simulacrums of the input sensors
     
-    front_wheel = wheel("Front")
-    rear_wheel = wheel("Rear")
-    main_tank = fueltank("Fuel Tank")
+    global sensors_dict
+    front_wheel = wheel("Front", sensors_dict["WHEEL_F_PRESENT"], sensors_dict["WHEEL_F_LOCKED"], sensors_dict["WHEEL_F_NEW"])
+    rear_wheel = wheel("Rear", sensors_dict["WHEEL_R_PRESENT"], sensors_dict["WHEEL_R_LOCKED"], sensors_dict["WHEEL_R_NEW"])
+    main_tank = fueltank("Fuel Tank", sensors_dict["FUEL_PROBE"])
     
     while True:
         front_wheel.set_present()
@@ -53,6 +58,8 @@ def gameloop():
         rear_wheel.set_lock()
         rear_wheel.set_new()
         
+        #print("fw present: " + str(front_wheel.present) + " fw locked: " + str(front_wheel.locked) + " fw new: " + str(front_wheel.new))
+        #print("rw present: " + str(rear_wheel.present) + " rw locked: " + str(rear_wheel.locked) + " rw new: " + str(rear_wheel.new))
         
         ## validation func calls go here
     
