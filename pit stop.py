@@ -1,6 +1,7 @@
-from time import *
-#import guizero
+from time import sleep
+import pygame
 from pitstopsensors import *
+from math import floor, sin, cos, pi
 
 SENSOR_CFG_FILE = "./sensors.txt"
 
@@ -11,7 +12,12 @@ sensors_dict = {}
 for line in sensors_list:
     keyval = line.replace(" ","").split("=")
     sensors_dict[keyval[0]] = int(keyval[1])
-
+    
+# pygame setup
+pygame.init()
+screen = pygame.display.set_mode((1600, 900))
+dt = 0
+elapsed = 0
 
 def idle():
     ## play attract video from here
@@ -49,6 +55,18 @@ def gameloop():
     rear_wheel = wheel("Rear", sensors_dict["WHEEL_R_PRESENT"], sensors_dict["WHEEL_R_LOCKED"], sensors_dict["WHEEL_R_NEW"])
     main_tank = fueltank("Fuel Tank", sensors_dict["FUEL_PROBE"])
     
+    global screen, dt, elapsed
+    clock = pygame.time.Clock()
+    clock_font = pygame.font.Font(pygame.font.match_font("7-segment", bold=True, italic=False), 96)
+#     clock_text = clock_font.render("00:00:00", True, (255, 255, 255))
+#     clock_rect = clock_text.get_rect()
+#     clock_rect.center = [screen.get_width() *0.5, screen.get_height()*0.5]
+    
+    indicators_font = pygame.font.Font(pygame.font.match_font("sans", bold=True, italic=False), 24)
+#     fwp_text = indicators_font.render("FW PRESENT", True, (0, 255, 0))
+#     fwp_rect = fwp_text.get_rect()
+#     fwp_rect.center = [screen.get_width() *0.33333, screen.get_height()*0.25]
+    
     while True:
         front_wheel.set_present()
         front_wheel.set_lock()
@@ -62,6 +80,55 @@ def gameloop():
         #print("rw present: " + str(rear_wheel.present) + " rw locked: " + str(rear_wheel.locked) + " rw new: " + str(rear_wheel.new))
         
         ## validation func calls go here
+        
+        # poll for events
+        # pygame.QUIT event means the user clicked X to close your window
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+        
+        screen.fill((0,0,128))
+        
+        
+        millisc = floor((elapsed - floor(elapsed)) * 100)
+        seconds = floor(elapsed) % 60
+        minutes = floor(elapsed / 60)
+        timestr = str(minutes).rjust(2, '0') + ":" + str(seconds).rjust(2, '0') + ":" + str(millisc).rjust(2, '0')
+        clock_text = clock_font.render(timestr, True, (255, 255, 255))
+        clock_rect = clock_text.get_rect()
+        clock_rect.center = [screen.get_width() *0.5, screen.get_height()*0.875]
+        screen.blit(clock_text, clock_rect)
+        
+        fwp_text = indicators_font.render("FW PRESENT: " + str(front_wheel.present), True, (255* int(not front_wheel.present), 255 * int(front_wheel.present), 0))
+        fwp_rect = fwp_text.get_rect()
+        fwp_rect.center = [screen.get_width() *0.25, screen.get_height()*0.25]
+        screen.blit(fwp_text, fwp_rect)
+        
+        fwl_text = indicators_font.render("FW LOCKED: " + str(front_wheel.locked), True, (255* int(not front_wheel.locked), 255 * int(front_wheel.locked), 0))
+        fwl_rect = fwl_text.get_rect()
+        fwl_rect.center = [screen.get_width() *0.25, screen.get_height()*0.30]
+        screen.blit(fwl_text, fwl_rect)
+        
+        rwp_text = indicators_font.render("RW PRESENT: " + str(rear_wheel.present), True, (255* int(not rear_wheel.present), 255 * int(rear_wheel.present), 0))
+        rwp_rect = rwp_text.get_rect()
+        rwp_rect.center = [screen.get_width() *0.75, screen.get_height()*0.25]
+        screen.blit(rwp_text, rwp_rect)
+        
+        rwl_text = indicators_font.render("RW LOCKED: " + str(rear_wheel.locked), True, (255* int(not rear_wheel.locked), 255 * int(rear_wheel.locked), 0))
+        rwl_rect = rwl_text.get_rect()
+        rwl_rect.center = [screen.get_width() *0.75, screen.get_height()*0.30]
+        screen.blit(rwl_text, rwl_rect)
+        
+        print(screen.get_width())
+       
+        # flip() the display to put your work on screen
+        pygame.display.flip()
+
+        # limits FPS to 60
+        # dt is delta time in seconds since last frame, used for framerate-
+        # independent physics.
+        dt = clock.tick(60) / 1000
+        elapsed += dt
     
 
 idle()
