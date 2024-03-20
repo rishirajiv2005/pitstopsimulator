@@ -1,4 +1,5 @@
-from time import sleep
+from time import *
+import guizero
 from pitstopsensors import *
 
 game_start = 0
@@ -41,15 +42,16 @@ def gameloop():
     
     front_wheel = wheel("Front")
     rear_wheel = wheel("Rear")
+    main_tank = fueltank("Fuel Tank")
     
     while True:
-        front_wheel.get_present()
-        front_wheel.get_lock()
-        front_wheel.get_new()
+        front_wheel.set_present()
+        front_wheel.set_lock()
+        front_wheel.set_new()
         
-        rear_wheel.get_present()
-        rear_wheel.get_lock()
-        rear_wheel.get_new()
+        rear_wheel.set_present()
+        rear_wheel.set_lock()
+        rear_wheel.set_new()
         
         
         ## validation func calls go here
