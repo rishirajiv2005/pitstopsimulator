@@ -12,7 +12,51 @@ REVERSE_WHEEL_BUTTONS = True
 
 
 class wheel:
+    """
+    Class which represents the wheels
+    
+    
+    Attributes
+    ----------
+    name : str
+        The name of the wheel, usually front or back
+        
+    present : bool
+        Represents whether or not the wheel is hanging on the hub
+        
+    locked : bool
+        Represents whether or not the wheel is locked, ie if lug nut is tightened
+        
+    new : bool
+        Represents if this is the new or old wheel
+    
+    valid : bool
+        Represents if the wheel sensors are indicated a valid state
+        Essentially, the wheel should not be indicated as locked but not present, since it needs to be present to be locked
+    
+    complete : bool
+        Represents if the process of unlocking and removing the old wheel and placing and locking the new wheel has been finished
+
+    
+    """
     def __init__(self, name, pin_no_present, pin_no_locked, pin_no_new):
+        """
+        Parameters
+        ----------
+        name : str
+            The name of the wheel, usually front or back
+        
+        pin_no_present : int
+            The GPIO pin number of the switch indicating if the wheel is present or not
+        
+        pin_no_present : int
+            The GPIO pin number of the switch indicating if the wheel is locked or not
+        
+        pin_no_new : int
+            The GPIO pin number of the switch indicating if the wheel is the old one or the new one
+            (this may or may not be used depending on the physical layout of the sim)
+        
+        """
         self.name = name ## string, rear or front, just for reference purposes
         self.present = True
         self.locked = True
@@ -51,6 +95,24 @@ class wheel:
 ## FUEL TANK CLASS
 
 class fueltank:
+    """
+    Class representing the fuel tank
+    
+    Attributes
+    ----------
+    probe_inserted : bool
+        Represents whether or not the probe is inserted
+    
+    level : float
+        Fuel level as a % of 100
+    
+    full : bool
+        Represents whether or not the fuel tank is full
+        
+    completed : bool
+        Represents whether or not the fuel tank goal is complete (tank is full and fuel probe is removed)
+    
+    """
     # name : name of the fuel tank
     # level : float representing % of fuel in tank
     # full : bool representing if the tank is full
@@ -63,6 +125,7 @@ class fueltank:
         self.full = False
         self.probe_inserted = False
         self.input_probe = Button(pin_no_probe)
+        self.complete = False
         
     def update(self):
         self.probe_inserted = bool(self.input_probe.value)
