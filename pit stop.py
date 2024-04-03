@@ -1,9 +1,10 @@
+import pygame, cv2
 from time import sleep
-import pygame
 from pitstopsensors import *
 from math import floor, sin, cos, pi
 
 SENSOR_CFG_FILE = "./sensors.txt"
+INTRO_VIDEO_FILE = "./pit stop mockup short.mp4"
 
 sensors_file = open(SENSOR_CFG_FILE, "r")
 sensors_list = sensors_file.readlines()
@@ -15,42 +16,79 @@ for line in sensors_list:
     
 # pygame setup
 pygame.init()
+#screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 screen = pygame.display.set_mode((1280, 720))
 dt = 0
 elapsed = 0
 
 def idle():
     ## play attract video from here
+    global screen
+    
+    idle_font = pygame.font.Font(pygame.font.match_font("sans", bold=True, italic=False), 96)
+    screen.fill((128,0,0))
+    idle_text = idle_font.render("Indy 500 Pit Stop Simulator", True, (255,255,255))
+    idle_rect = idle_text.get_rect()
+    idle_rect.center = [screen.get_width() *0.5, screen.get_height()*0.5]
+    screen.blit(idle_text, idle_rect)
+    pygame.display.flip()
     
     global sensors_dict
     game_start_input = Button(sensors_dict["GAME_START"])
     while True:
-        print("idling")
+        #print("idling")
 
         if game_start_input.value:
-            print("countdown")
+            #print("countdown")
             countdown()
         
         sleep(1)
 
 def countdown():
+    global screen
     ## play coutndown video from here
     
     
     ## find some multimedia library that can call back to here when the video is done playing, then initiate the game
     ## for now there is just gonna be a cute little for loop here
     
-    global screen
+    ## using cv2
+    
+    intro_video = cv2.VideoCapture(INTRO_VIDEO_FILE)
+    success, video_frame = intro_video.read()
+    playback = success
+    clock = pygame.time.Clock()
+    
+#    fps = video.get(cv2.CAP_PROP_FPS)
+    while playback:
+        clock.tick(23.976024)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                playback = false
+        success, video_frame = intro_video.read()
+        if success:
+            #print(str(video_frame.shape[1::-1]))
+            video_blit = pygame.image.frombuffer(video_frame.tobytes(), video_frame.shape[1::-1], "BGR")
+            video_blit = pygame.transform.scale(video_blit, (screen.get_width(),screen.get_height()))
+        else:
+            print("huh")
+            playback = False
+        screen.blit(video_blit, (0,0))
+        pygame.display.flip()
+                
+    
+    
+    
     countdown_font = pygame.font.Font(pygame.font.match_font("sans", bold=True, italic=False), 160)
     screen.fill((128,0,0))
     pygame.display.flip()
     
     for i in range(1, 4):
         screen.fill((128,0,0))
-        fwn_text = countdown_font.render(str(4- i), True, (255,255,255))
-        fwn_rect = fwn_text.get_rect()
-        fwn_rect.center = [screen.get_width() *0.5, screen.get_height()*0.5]
-        screen.blit(fwn_text, fwn_rect)
+        cd_text = countdown_font.render(str(4- i), True, (255,255,255))
+        cd_rect = cd_text.get_rect()
+        cd_rect.center = [screen.get_width() *0.5, screen.get_height()*0.5]
+        screen.blit(cd_text, cd_rect)
         pygame.display.flip()
         sleep(1)
     
