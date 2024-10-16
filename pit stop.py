@@ -16,7 +16,7 @@ for line in sensors_list:
     
 # pygame setup
 pygame.init()
-screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)   # initializes full-screen display
 #screen = pygame.display.set_mode((1280, 720))
 dt = 0
 elapsed = 0
@@ -25,7 +25,7 @@ def idle():
     ## play attract video from here
     global screen
     
-    idle_font = pygame.font.Font(pygame.font.match_font("sans", bold=True, italic=False), 96)
+    idle_font = pygame.font.Font(pygame.font.match_font("sans", bold=True, italic=False), 96)   # displays title text in center of screen
     screen.fill((128,0,0))
     idle_text = idle_font.render("Indy 500 Pit Stop Simulator", True, (255,255,255))
     idle_rect = idle_text.get_rect()
@@ -68,7 +68,7 @@ def countdown():
         success, video_frame = intro_video.read()
         if success:
             #print(str(video_frame.shape[1::-1]))
-            video_blit = pygame.image.frombuffer(video_frame.tobytes(), video_frame.shape[1::-1], "BGR")
+            video_blit = pygame.image.frombuffer(video_frame.tobytes(), video_frame.shape[1::-1], "BGR")   # scales and displays video frames to fit the screen
             video_blit = pygame.transform.scale(video_blit, (screen.get_width(),screen.get_height()))
         else:
             print("huh")
@@ -79,7 +79,7 @@ def countdown():
     
     
     
-    countdown_font = pygame.font.Font(pygame.font.match_font("sans", bold=True, italic=False), 160)
+    countdown_font = pygame.font.Font(pygame.font.match_font("sans", bold=True, italic=False), 160)   # displays countdown text in the center of the screen
     screen.fill((128,0,0))
     pygame.display.flip()
     
@@ -137,7 +137,8 @@ def gameloop():
         clock_rect = clock_text.get_rect()
         clock_rect.center = [screen.get_width() *0.5, screen.get_height()*0.875]
         screen.blit(clock_text, clock_rect)
-        
+
+        # controls and displays font effectively
         fwp_text = indicators_font.render("FW PRESENT: " + str(front_wheel.get_present()), True, (255* int(not front_wheel.get_present()), 255 * int(front_wheel.get_present()), 0))
         fwp_rect = fwp_text.get_rect()
         fwp_rect.center = [screen.get_width() *0.25, screen.get_height()*0.25]
@@ -223,7 +224,8 @@ def gameloop():
         if ((not tc) and fuel.get_full()):
             tc = True
             tc_time = timestr
-        
+
+        # shows elapsed time in the game
         clock_tc_text = clock_font_comp.render(tc_time, True, (255, 255, 255))
         clock_tc_rect = clock_fc_text.get_rect()
         clock_tc_rect.center = [screen.get_width() *0.5, screen.get_height()*0.675]
