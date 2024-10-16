@@ -25,7 +25,7 @@ def idle():
     ## play attract video from here
     global screen
     
-    idle_font = pygame.font.Font(pygame.font.match_font("sans", bold=True, italic=False), 96)   # displays title text in center of screen
+    idle_font = pygame.font.Font(pygame.font.match_font("paradiso", bold=True, italic=False), 96)   # displays title text in center of screen
     screen.fill((128,0,0))
     idle_text = idle_font.render("Indy 500 Pit Stop Simulator", True, (255,255,255))
     idle_rect = idle_text.get_rect()
@@ -46,7 +46,7 @@ def idle():
 
 def countdown():
     global screen
-    ## play coutndown video from here
+    ## play countdown video from here
     
     
     ## find some multimedia library that can call back to here when the video is done playing, then initiate the game
@@ -79,7 +79,7 @@ def countdown():
     
     
     
-    countdown_font = pygame.font.Font(pygame.font.match_font("sans", bold=True, italic=False), 160)   # displays countdown text in the center of the screen
+    countdown_font = pygame.font.Font(pygame.font.match_font("paradiso", bold=True, italic=False), 160)   # displays countdown text in the center of the screen
     screen.fill((128,0,0))
     pygame.display.flip()
     
@@ -107,7 +107,7 @@ def gameloop():
     clock = pygame.time.Clock()
     clock_font = pygame.font.Font(pygame.font.match_font("7-segment", bold=True, italic=False), 128)
     
-    indicators_font = pygame.font.Font(pygame.font.match_font("sans", bold=True, italic=False), 24)
+    indicators_font = pygame.font.Font(pygame.font.match_font("paradiso", bold=True, italic=False), 24)
     clock_font_comp = pygame.font.Font(pygame.font.match_font("7-segment", bold=True, italic=False), 48)
     
     fc = rc = tc = False
